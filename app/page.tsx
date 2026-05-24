@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#f5fbf5]">
 
-      <Navbar />
+      
 
       <main className="max-w-[1200px] mx-auto px-6 lg:px-8 py-10">
 
