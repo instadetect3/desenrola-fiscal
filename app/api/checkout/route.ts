@@ -12,12 +12,13 @@ export async function POST() {
     const response = await preference.create({
       body: {
         items: [
-          {
-            title: "Plano Pro",
-            quantity: 1,
-            unit_price: 19.9,
-          },
-        ],
+  {
+    id: "plano-pro", // 👈 ADICIONA ISSO
+    title: "Plano Pro",
+    quantity: 1,
+    unit_price: 19.9,
+  }
+],
       },
     })
 
