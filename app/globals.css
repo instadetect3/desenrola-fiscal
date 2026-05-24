@@ -1,8 +1,14 @@
 @import "tailwindcss";
 
+/* =========================
+   BASE THEME (SAAS MODERNO)
+========================= */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5fbf5;
+  --foreground: #0f172a;
+  --primary: #22c55e;
+  --secondary: #7c3aed;
 }
 
 @theme inline {
@@ -12,15 +18,36 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* =========================
+   DARK MODE (opcional futuro)
+========================= */
+
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0b1220;
+    --foreground: #e5e7eb;
   }
 }
+
+/* =========================
+   BASE GLOBAL
+========================= */
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* =========================
+   ANIMAÇÃO DO PATO
+========================= */
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
