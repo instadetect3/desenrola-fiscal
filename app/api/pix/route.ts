@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server"
-import mercadopago from "mercadopago"
+import { MercadoPagoConfig, Payment } from "mercadopago"
 
-mercadopago.configure({
-  access_token: process.env.MERCADO_PAGO_TOKEN!,
+const client = new MercadoPagoConfig({
+  accessToken: process.env.MERCADO_PAGO_TOKEN!,
 })
-
 export async function POST(req: Request) {
   try {
     const { email } = await req.json()
