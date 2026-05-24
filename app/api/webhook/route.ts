@@ -19,12 +19,13 @@ export async function POST(req: Request) {
       })
 
       if (data.status === "approved") {
-        const email = data.payer.email
+        const email = data.payer?.email
 
-        // 🔥 aqui você precisa mapear email → usuário
-        // por enquanto vamos assumir que você salva email no firestore
+        if (!email) {
+          console.log("⚠️ Pagamento sem email")
+          return NextResponse.json({ ok: true })
+        }
 
-        // EXEMPLO (ajusta conforme seu banco):
         const userRef = doc(db, "usuarios", email)
 
         await updateDoc(userRef, {
