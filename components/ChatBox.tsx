@@ -14,6 +14,7 @@ export default function ChatBox() {
   const [user, setUser] = useState<any>(null)
   const [perguntasRestantes, setPerguntasRestantes] = useState(0)
   const [showLimit, setShowLimit] = useState(false)
+  const [isMaster, setIsMaster] = useState(false)
 
   useEffect(() => {
     onAuthStateChanged(auth, async (usuario) => {
@@ -24,7 +25,10 @@ export default function ChatBox() {
         const docSnap = await getDoc(docRef)
 
         if (docSnap.exists()) {
-          setPerguntasRestantes(docSnap.data().perguntasRestantes)
+          const dados = docSnap.data()
+
+          setPerguntasRestantes(dados.perguntasRestantes || 10)
+          setIsMaster(dados.master === true)
         }
       }
     })
@@ -33,14 +37,12 @@ export default function ChatBox() {
   async function enviarPergunta() {
     if (!mensagem) return
 
-    // 🔒 precisa estar logado
     if (!user) {
       toast.error("Faça login para usar a IA")
       return
     }
 
-    // 🔒 limite
-    if (perguntasRestantes <= 0) {
+    if (!isMaster && perguntasRestantes <= 0) {
       setShowLimit(true)
       return
     }
@@ -56,13 +58,15 @@ export default function ChatBox() {
       setRespostas((prev) => [...prev, mensagem, data.resposta])
       setMensagem("")
 
-      // 🔥 atualiza contador
-      const novoValor = perguntasRestantes - 1
-      setPerguntasRestantes(novoValor)
+      if (!isMaster) {
+        const novoValor = perguntasRestantes - 1
 
-      await updateDoc(doc(db, "usuarios", user.uid), {
-        perguntasRestantes: novoValor,
-      })
+        setPerguntasRestantes(novoValor)
+
+        await updateDoc(doc(db, "usuarios", user.uid), {
+          perguntasRestantes: novoValor,
+        })
+      }
 
     } catch (error) {
       toast.error("Erro ao enviar pergunta")
@@ -72,24 +76,20 @@ export default function ChatBox() {
   return (
     <div className="w-full max-w-xl">
 
-      {/* Ícone */}
       <div className="flex justify-center mb-4">
         <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
           <MessageCircle size={18} className="text-white" />
         </div>
       </div>
 
-      {/* Título */}
       <h2 className="text-3xl lg:text-4xl font-bold text-center mb-6">
         <span className="text-gray-900">Sobre o que posso ajudar </span>
         <span className="text-green-600">você</span>{" "}
         <span className="text-gray-900">hoje?</span>
       </h2>
 
-      {/* Chat */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
 
-        {/* Mensagens */}
         <div className="max-h-60 overflow-y-auto mb-4 space-y-2">
           {respostas.map((msg, i) => (
             <div
@@ -105,7 +105,6 @@ export default function ChatBox() {
           ))}
         </div>
 
-        {/* Input */}
         <textarea
           value={mensagem}
           onChange={(e) => setMensagem(e.target.value)}
@@ -113,7 +112,6 @@ export default function ChatBox() {
           className="w-full h-24 resize-none outline-none text-gray-700 placeholder:text-gray-400"
         />
 
-        {/* Rodapé */}
         <div className="border-t border-gray-100 mt-4 pt-3 flex items-center justify-between">
 
           <div className="flex flex-col text-xs text-gray-500">
@@ -123,7 +121,9 @@ export default function ChatBox() {
             </div>
 
             <span className="mt-1">
-              Perguntas restantes: {perguntasRestantes}
+              {isMaster
+                ? "Perguntas ilimitadas"
+                : `Perguntas restantes: ${perguntasRestantes}`}
             </span>
           </div>
 
@@ -137,8 +137,10 @@ export default function ChatBox() {
         </div>
       </div>
 
-      {/* 🔥 MODAL */}
-      <LimitModal open={showLimit} onClose={() => setShowLimit(false)} />
+      <LimitModal
+        open={showLimit}
+        onClose={() => setShowLimit(false)}
+      />
 
     </div>
   )
